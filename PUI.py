@@ -1,8 +1,10 @@
+# Include file with PUI global definitions   
 
 specialPUIs = ["USLAB000095","USLAB000096","USLAB000097","USLAB000098","USLAB000012",'USLAB000086']
 
 # This really needs to be in a data file
-
+#This is the full text expansion from the PUI to the "friendly name"
+# Original comes from a spreadsheet provided in the mimic project on github 
 PUI_NAMES = { \
 'AIRLOCK000001':'Supplies power through the Umbilical Interface Assembly (UIA) to the spacesuits (EMU 1), Voltage', \
 'AIRLOCK000002':'Supplies power through the Umbilical Interface Assembly (UIA) to the spacesuits (EMU 1), Current', \
@@ -344,21 +346,30 @@ PUI_NAMES = { \
 'CSAMBA00004':'MSS OCS Payload Status MBS POA' \
 }
 
+#These are PUI's which map to a lookup list of full text names based upon the item_value
 USLAB000095 = {0:" -",1:"WETA 113 (S3)",2:"S1 Upper Outboard (UPOB)",3:"SCU1 Mux",4:"S1 Lower Outboard (LOOB)",5:"JEM Channel 1",6:"JEM Channel 2",7:"S1 Upper Inboard (UPIB)",8:"S1 Lower Inboard (LOIB)",9:"Columbus 1",10:"Columbus 2",11:"P1 Upper Inboard (UPIB)",12:"SCU2 Mux",13:"Node 3 Starboard",14:"P1 Lower Inboard (LOIB)",15:"SCU1 Test",16:"WETA 112 (Node2)",17:"ORB1",18:"ORB2",19:"P1 Lower Outboard (LOOB)",20:"SCU2 Test",21:"P3 Aft",22:"Payload Rack",23:"VTR1",24:"VTR2",25:"Node 2 Nadir",26:"WETA 115 (Node1)",28:"Lab Starboard",31:"MBS POA Payload 3",32:"MBS POA",33:"SPDM S1",34:"SPDM S2",35:"MBS CLPA",36:"SPDM LEE",37:"MBS Mast",40:"SSRMS Base LEE",43:"SSRMS Base Elbow",48:"SSRMS Tip Elbow",50:"MSS Payload 3",51:"SSRMS Tip LEE",52:"Lab AVU1",53:"Lab AVU2",54:"Cup AVU1",55:"Cup AVU2",56:"SPDM OTCM 1",57:"SPDM Body 1",58:"SPDM OTCM 2",59:"SPDM Body 2",60:"SSRMS Payload 1",61:"SSRMS Payload 2",62:"SSRMS Payload 3",63:"MSS Payload 1",64:"MSS Payload 2",65:"Lab Rack 1D3",66:"Lab Rack 1P2",67:"Lab Rack 1P4",68:"Lab Camera",69:"Lab Rack 1O5",70:"Lab Rack 1O4",71:"Lab Rack 1O3",72:"Lab Rack 1O2",73:"Lab Rack 1O1",74:"Lab Rack 1S1",75:"Lab Rack 1S2",76:"Lab Rack 1S3",77:"Airlock Camera",78:"Lab Rack 1S4",79:"Node 1 Camera",80:"Node 3 Camera"}
 USLAB000096 = {0:" -",1:"WETA 113 (S3)",2:"S1 Upper Outboard (UPOB)",3:"SCU1 Mux",4:"S1 Lower Outboard (LOOB)",5:"JEM Channel 1",6:"JEM Channel 2",7:"S1 Upper Inboard (UPIB)",8:"S1 Lower Inboard (LOIB)",9:"Columbus 1",10:"Columbus 2",11:"P1 Upper Inboard (UPIB)",12:"SCU2 Mux",13:"Node 3 Starboard",14:"P1 Lower Inboard (LOIB)",15:"SCU1 Test",16:"WETA 112 (Node2)",17:"ORB1",18:"ORB2",19:"P1 Lower Outboard (LOOB)",20:"SCU2 Test",21:"P3 Aft",22:"Payload Rack",23:"VTR1",24:"VTR2",25:"Node 2 Nadir",26:"WETA 115 (Node1)",28:"Lab Starboard",31:"MBS POA Payload 3",32:"MBS POA",33:"SPDM S1",34:"SPDM S2",35:"MBS CLPA",36:"SPDM LEE",37:"MBS Mast",40:"SSRMS Base LEE",43:"SSRMS Base Elbow",48:"SSRMS Tip Elbow",50:"MSS Payload 3",51:"SSRMS Tip LEE",52:"Lab AVU1",53:"Lab AVU2",54:"Cup AVU1",55:"Cup AVU2",56:"SPDM OTCM 1",57:"SPDM Body 1",58:"SPDM OTCM 2",59:"SPDM Body 2",60:"SSRMS Payload 1",61:"SSRMS Payload 2",62:"SSRMS Payload 3",63:"MSS Payload 1",64:"MSS Payload 2",65:"Lab Rack 1D3",66:"Lab Rack 1P2",67:"Lab Rack 1P4",68:"Lab Camera",69:"Lab Rack 1O5",70:"Lab Rack 1O4",71:"Lab Rack 1O3",72:"Lab Rack 1O2",73:"Lab Rack 1O1",74:"Lab Rack 1S1",75:"Lab Rack 1S2",76:"Lab Rack 1S3",77:"Airlock Camera",78:"Lab Rack 1S4",79:"Node 1 Camera",80:"Node 3 Camera"}
 USLAB000097 = {0:" -",1:"WETA 113 (S3)",2:"S1 Upper Outboard (UPOB)",3:"SCU1 Mux",4:"S1 Lower Outboard (LOOB)",5:"JEM Channel 1",6:"JEM Channel 2",7:"S1 Upper Inboard (UPIB)",8:"S1 Lower Inboard (LOIB)",9:"Columbus 1",10:"Columbus 2",11:"P1 Upper Inboard (UPIB)",12:"SCU2 Mux",13:"Node 3 Starboard",14:"P1 Lower Inboard (LOIB)",15:"SCU1 Test",16:"WETA 112 (Node2)",17:"ORB1",18:"ORB2",19:"P1 Lower Outboard (LOOB)",20:"SCU2 Test",21:"P3 Aft",22:"Payload Rack",23:"VTR1",24:"VTR2",25:"Node 2 Nadir",26:"WETA 115 (Node1)",28:"Lab Starboard",31:"MBS POA Payload 3",32:"MBS POA",33:"SPDM S1",34:"SPDM S2",35:"MBS CLPA",36:"SPDM LEE",37:"MBS Mast",40:"SSRMS Base LEE",43:"SSRMS Base Elbow",48:"SSRMS Tip Elbow",50:"MSS Payload 3",51:"SSRMS Tip LEE",52:"Lab AVU1",53:"Lab AVU2",54:"Cup AVU1",55:"Cup AVU2",56:"SPDM OTCM 1",57:"SPDM Body 1",58:"SPDM OTCM 2",59:"SPDM Body 2",60:"SSRMS Payload 1",61:"SSRMS Payload 2",62:"SSRMS Payload 3",63:"MSS Payload 1",64:"MSS Payload 2",65:"Lab Rack 1D3",66:"Lab Rack 1P2",67:"Lab Rack 1P4",68:"Lab Camera",69:"Lab Rack 1O5",70:"Lab Rack 1O4",71:"Lab Rack 1O3",72:"Lab Rack 1O2",73:"Lab Rack 1O1",74:"Lab Rack 1S1",75:"Lab Rack 1S2",76:"Lab Rack 1S3",77:"Airlock Camera",78:"Lab Rack 1S4",79:"Node 1 Camera",80:"Node 3 Camera"}
 USLAB000098 = {0:" -",1:"WETA 113 (S3)",2:"S1 Upper Outboard (UPOB)",3:"SCU1 Mux",4:"S1 Lower Outboard (LOOB)",5:"JEM Channel 1",6:"JEM Channel 2",7:"S1 Upper Inboard (UPIB)",8:"S1 Lower Inboard (LOIB)",9:"Columbus 1",10:"Columbus 2",11:"P1 Upper Inboard (UPIB)",12:"SCU2 Mux",13:"Node 3 Starboard",14:"P1 Lower Inboard (LOIB)",15:"SCU1 Test",16:"WETA 112 (Node2)",17:"ORB1",18:"ORB2",19:"P1 Lower Outboard (LOOB)",20:"SCU2 Test",21:"P3 Aft",22:"Payload Rack",23:"VTR1",24:"VTR2",25:"Node 2 Nadir",26:"WETA 115 (Node1)",28:"Lab Starboard",31:"MBS POA Payload 3",32:"MBS POA",33:"SPDM S1",34:"SPDM S2",35:"MBS CLPA",36:"SPDM LEE",37:"MBS Mast",40:"SSRMS Base LEE",43:"SSRMS Base Elbow",48:"SSRMS Tip Elbow",50:"MSS Payload 3",51:"SSRMS Tip LEE",52:"Lab AVU1",53:"Lab AVU2",54:"Cup AVU1",55:"Cup AVU2",56:"SPDM OTCM 1",57:"SPDM Body 1",58:"SPDM OTCM 2",59:"SPDM Body 2",60:"SSRMS Payload 1",61:"SSRMS Payload 2",62:"SSRMS Payload 3",63:"MSS Payload 1",64:"MSS Payload 2",65:"Lab Rack 1D3",66:"Lab Rack 1P2",67:"Lab Rack 1P4",68:"Lab Camera",69:"Lab Rack 1O5",70:"Lab Rack 1O4",71:"Lab Rack 1O3",72:"Lab Rack 1O2",73:"Lab Rack 1O1",74:"Lab Rack 1S1",75:"Lab Rack 1S2",76:"Lab Rack 1S3",77:"Airlock Camera",78:"Lab Rack 1S4",79:"Node 1 Camera",80:"Node 3 Camera"} 
 USLAB000012 = {0:"Default",1:"WAIT",2:"RESERVED",3:"STANDBY",4:"CMG ATTITUDE CONTROL",5:"CMG/THRUSTER ASSIST ATTITUDE CONTROL",6:"USER DATA GENERATION",7:"FREEDRIFT"}
 USLAB000086 = {1:"Standard",2:"Microgravity",4:"Reboost",8:"Proximity_Ops",16:"External_Ops",32:"Survival",64:"ASCR",127:"all_modes"}
+
 if __name__ == '__main__':  
 
+   #This is an example of how to USE this PUI.py code
+   # from PUI import *
+   
+   #Simulating the evaluation of the "specialPUIs" key/value pair 
    item_name = "USLAB000095"
    item_value = u"1"
    if item_name in specialPUIs:
-          print eval(item_name)[int(item_value.encode('ascii', 'ignore'))]
+      # all the the PUI's listed in the specialPUI's list have a related Key/Value dict which maps their item_value to a plain text expansion" 
+      print "SpecialPUI:", item_name, PUI_NAMES[item_name]
+      print "   ", item_value, eval(item_name)[int(item_value.encode('ascii', 'ignore'))]
    else : 
         print "nothing"
-   
-   print PUI_NAMES['AIRLOCK000010']
+   print 
+   # This is just an axample of the full PUI name expansion to a friendly name from the given PUI code
+   print "AIRLOCK000010",PUI_NAMES['AIRLOCK000010']
      
        
