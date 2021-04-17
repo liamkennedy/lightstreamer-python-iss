@@ -21,6 +21,7 @@ import time
 import traceback
 import os
 import datetime
+import math 
 
 # Modules aliasing and function utilities to support a
 # very coarse version differentiation between Python 2 and Python 3.
@@ -525,9 +526,74 @@ subscription = Subscription(
 
 #STB_POWER = "S4000001","S4000002","S4000007"
 #PRT_POWER = "P6000004","P6000005","P6000008"
+# "S0000003","S0000004","S0000008","S0000009","P6000004","P6000005","P6000008","S4000001","S4000002","S4000007"
+# "USLAB000018","USLAB000019","USLAB000020","USLAB000021"
+
+Qvals = ["USLAB000018","USLAB000019","USLAB000020","USLAB000021"]
+yaw = None
+pitch = None
+roll = None 
+LVLH = {}
+
+def initLVLH() :
+    global LVLH
+    LVLH = {}
+
+def gotAllLVLH(item_name, item_value) :
+    global LVLH
+    if item_name in Qvals :
+       LVLH[item_name] = float(item_value.encode('ascii', 'ignore'))
+    
+       gotall = True
+       for i in Qvals :
+           if not LVLH.has_key(i) :
+              gotall = False
+              break 
+    
+    return gotall
+
+def setRPY() :
+    global yaw,pitch,roll, LVLH
+    Q0 = LVLH["USLAB000018"]
+    Q1 = LVLH["USLAB000019"]
+    Q2 = LVLH["USLAB000020"]
+    Q3 = LVLH["USLAB000021"]
+    
+    c12 = 2 * (Q1 * Q2 + Q0 * Q3)
+    c11 = Q0 * Q0 + Q1 * Q1 - Q2 * Q2 - Q3 * Q3
+    c13 = 2 * (Q1 * Q3 - Q0 * Q2)
+    c23 = 2 * (Q2 * Q3 + Q0 * Q1)
+    c33 = Q0 * Q0 - Q1 * Q1 - Q2 * Q2 + Q3 * Q3
+    c22 = Q0 * Q0 - Q1 * Q1 + Q2 * Q2 - Q3 * Q3
+    c21 = 2 * (Q1 * Q2 - Q0 * Q3)
+    mag_c13 = abs(c13) #all c's should be in radians
+    
+    yaw = 0.0
+    pitch = 0.0
+    roll = 0.0
+    
+    if (mag_c13 < 1):       
+       yaw = math.atan2(c12, c11)
+       pitch = math.atan2(-c13, math.sqrt(1.0 - (c13 * c13)))
+       roll = math.atan2(c23, c33)
+
+    elif (mag_c13 == 1): 
+         yaw = math.atan2(-c21, c22)
+         pitch = math.asin(-c13)
+         roll = 0.0
+    			
+    #convert to degrees
+    yaw = yaw * 180 / math.pi
+    pitch = pitch * 180 / math.pi
+    roll = roll * 180 / math.pi 
+        
+    initLVLH()   
+
+initLVLH()
+
 subscription = Subscription(
     mode="MERGE",
-    items=["USLAB000086","USLAB000081","USLAB000012","USLAB000016","S0000003","S0000004","S0000008","S0000009","P6000004","P6000005","P6000008","S4000001","S4000002","S4000007"],
+    items=["USLAB000086","USLAB000081","USLAB000012","USLAB000016","USLAB000018","USLAB000019","USLAB000020","USLAB000021"],
     fields=["Value","TimeStamp"],
     adapter="") 
 
@@ -537,11 +603,11 @@ print "UnixFileModEpochYear",UnixFileModEpochYear
 
 def unixtimestamp_to_dt(uts) :
     dt =datetime.datetime.fromtimestamp(uts)
-    print dt.strftime('%Y-%m-%d %H:%M:%S')
+    #print dt.strftime('%Y-%m-%d %H:%M:%S')
     return dt    
 # A simple function acting as a Subscription listener
 
-csv_file = "ls-soyuz.csv"
+csv_file = "ls-yaw_pitch-roll.csv"
 
 def on_item_update(item_update):
 
@@ -550,42 +616,24 @@ def on_item_update(item_update):
     item_name = item_update["name"]
     item_value = item_update["values"]["Value"] 
     print "name", item_name, PUI_NAMES[item_name]
-    csv_txt = item_name+","+'"'+PUI_NAMES[item_name]+'"'+","+item_value+","
-    if item_update["name"] == "USLAB000040" :
-       # Beta Angle
-       betaAngleValue = float(item_update["values"]["Value"].encode('ascii', 'ignore'))
-       
-    if item_name in specialPUIs:
-       vtxt = eval(item_name)[int(item_value.encode('ascii', 'ignore'))]
-       print "  ",vtxt
-       csv_txt = csv_txt + '"'+vtxt+'"' + ","
-    else :
-       csv_txt = csv_txt + "," 
-       
-    print "  values:",TS_to_GMT(item_update["values"]["TimeStamp"])
-    tsu = item_update["values"]["TimeStamp"]
-    ts_str = tsu.encode('ascii', 'ignore')
-    print ts_str
-    ts = float( ts_str )  
-    HoursFromJan1AsEpoch = ts 
-    SecondsFromJan1AsEpoch = HoursFromJan1AsEpoch * 60 * 60
-    ResultingEpoch =  UnixFileModEpochYear + SecondsFromJan1AsEpoch
     
-    print "Timestamp date:",
-    dt =unixtimestamp_to_dt(ResultingEpoch)
-    csv_txt = dt.strftime('%Y-%m-%d %H:%M:%S') +","+ csv_txt + "\n" 
-
-    with open(csv_file, "a") as myfile:
-              myfile.write(csv_txt)
-              
-    print "  Value", item_value
-    if item_update["name"] == "TIME_000001" :
-       # note time value is number of milliseconds SINCE Jan 1
-       print "TIME:",
-       dtv = unixtimestamp_to_dt( float( item_value)/1000 + UnixFileModEpochYear )
-       
-
-
+    if item_name in Qvals :
+       if gotAllLVLH(item_name,item_value) :
+          setRPY()
+          
+          #print "  values:",TS_to_GMT(item_update["values"]["TimeStamp"])
+          tsu = item_update["values"]["TimeStamp"]
+          ts_str = tsu.encode('ascii', 'ignore')
+          #print ts_str
+          ts = float( ts_str )  
+          HoursFromJan1AsEpoch = ts 
+          SecondsFromJan1AsEpoch = HoursFromJan1AsEpoch * 60 * 60
+          ResultingEpoch =  UnixFileModEpochYear + SecondsFromJan1AsEpoch
+          dt =unixtimestamp_to_dt(ResultingEpoch)
+          csv_txt = dt.strftime('%Y-%m-%d %H:%M:%S') +","+ str(yaw) +"," + str(pitch) +"," + str(roll) + "\n"
+          print csv_txt 
+          with open(csv_file, "a") as myfile:
+                    myfile.write(csv_txt)
     
     #print item_update.getItemName(), item_update.getItemValue("Value")
     #print("{Public_PUI:<19}: Category{Category:>6} - Description {Description:<8}"
