@@ -21,6 +21,7 @@ import time
 import traceback
 import os
 import datetime
+import math 
 
 # Modules aliasing and function utilities to support a
 # very coarse version differentiation between Python 2 and Python 3.
@@ -74,6 +75,7 @@ SYNC_ERROR_CMD = "SYNC ERROR"
 OK_CMD = "OK"
 
 log = logging.getLogger("iss-live")
+#logging.basicConfig(level=logging.DEBUG)
 #logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
 
 
@@ -294,11 +296,17 @@ class LSClient(object):
 
         # Send the control request to perform the subscription
         log.debug("Making a new subscription request")
+        # that LS_snapshot is the key to getting the last/current value of the telemetry
+        # I had to pick apart the actual Javascript client source to get this 
+        # line 487 here: https://github.com/Lightstreamer/Lightstreamer-lib-client-javascript/blob/33378e564926146ac96cf185da1c5e4ee6545043/source/Subscription.js#L1153
+        # LS_requested_max_frequency is another one to add possibly to keep data updates down for very active items (e.g. ,"TIME_000001")
         server_response = self._control({
             "LS_Table": self._current_subscription_key,
             "LS_op": OP_ADD,
             "LS_data_adapter": subscription.adapter,
             "LS_mode": subscription.mode,
+            "LS_snapshot": 'true',
+            "LS_requested_max_frequency" : 0.033,
             "LS_schema": " ".join(subscription.field_names),
             "LS_id": " ".join(subscription.item_names),
         })
@@ -495,7 +503,7 @@ subscription = Subscription(
 "CSASPDM0011","CSASPDM0012","CSASPDM0013","CSASPDM0014","CSASPDM0015","CSASPDM0016",
 "CSASPDM0017","CSASPDM0018","CSASPDM0019","CSASPDM0020","CSASPDM0021","CSASPDM0022",
 "CSAMBS00001","CSAMBS00002","CSAMBA00003","CSAMBA00004"],
-    fields=["Value","TimeStamp"],
+    fields=["Value","TimeStamp","Status.Class","Status.Indicator","Status.Color","CalibratedData"],
     adapter="")    
 '''
 
@@ -510,30 +518,144 @@ subscription = Subscription(
 # USLAB000097 Video Source Routed to Downlink 3
 # USLAB000098 Video Source Routed to Downlink 4
 
+#Normally MERGE mode vs DISTINCT
+#"LS_requested_max_frequency" : 1,
+#items=["USLAB000040","USLAB000086","USLAB000081","USLAB000012","USLAB000088","USLAB000089","USLAB000090","USLAB000091",
+#"USLAB000095","USLAB000096","USLAB000097","USLAB000098"],
+#items=["USLAB000040","USLAB000086","USLAB000081","USLAB000012","USLAB000095","USLAB000096","USLAB000097","USLAB000098"],
+
+#STB_POWER = "S4000001","S4000002","S4000007"
+#PRT_POWER = "P6000004","P6000005","P6000008"
+# "S0000003","S0000004","S0000008","S0000009","P6000004","P6000005","P6000008","S4000001","S4000002","S4000007"
+# "USLAB000018","USLAB000019","USLAB000020","USLAB000021"
+
+Qvals = ["USLAB000018","USLAB000019","USLAB000020","USLAB000021"]
+yaw = None
+pitch = None
+roll = None 
+LVLH = {}
+
+def initLVLH() :
+    global LVLH
+    LVLH = {}
+
+def gotAllLVLH(item_name, item_value) :
+    global LVLH
+    if item_name in Qvals :
+       LVLH[item_name] = float(item_value.encode('ascii', 'ignore'))
+    
+       gotall = True
+       for i in Qvals :
+           if not LVLH.has_key(i) :
+              gotall = False
+              break 
+    
+    return gotall
+
+def setRPY() :
+    global yaw,pitch,roll, LVLH
+    Q0 = LVLH["USLAB000018"]
+    Q1 = LVLH["USLAB000019"]
+    Q2 = LVLH["USLAB000020"]
+    Q3 = LVLH["USLAB000021"]
+    
+    c12 = 2 * (Q1 * Q2 + Q0 * Q3)
+    c11 = Q0 * Q0 + Q1 * Q1 - Q2 * Q2 - Q3 * Q3
+    c13 = 2 * (Q1 * Q3 - Q0 * Q2)
+    c23 = 2 * (Q2 * Q3 + Q0 * Q1)
+    c33 = Q0 * Q0 - Q1 * Q1 - Q2 * Q2 + Q3 * Q3
+    c22 = Q0 * Q0 - Q1 * Q1 + Q2 * Q2 - Q3 * Q3
+    c21 = 2 * (Q1 * Q2 - Q0 * Q3)
+    mag_c13 = abs(c13) #all c's should be in radians
+    
+    yaw = 0.0
+    pitch = 0.0
+    roll = 0.0
+    
+    if (mag_c13 < 1):       
+       yaw = math.atan2(c12, c11)
+       pitch = math.atan2(-c13, math.sqrt(1.0 - (c13 * c13)))
+       roll = math.atan2(c23, c33)
+
+    elif (mag_c13 == 1): 
+         yaw = math.atan2(-c21, c22)
+         pitch = math.asin(-c13)
+         roll = 0.0
+    			
+    #convert to degrees
+    yaw = yaw * 180 / math.pi
+    pitch = pitch * 180 / math.pi
+    roll = roll * 180 / math.pi 
+        
+    initLVLH()   
+
+initLVLH()
+
 subscription = Subscription(
     mode="MERGE",
-    items=["USLAB000040","USLAB000086","USLAB000081","USLAB000088","USLAB000089","USLAB000090","USLAB000091",
-"USLAB000095","USLAB000096","USLAB000097","USLAB000098"],
+    items=["USLAB000086","USLAB000081","USLAB000012","USLAB000016","USLAB000018","USLAB000019","USLAB000020","USLAB000021"],
     fields=["Value","TimeStamp"],
     adapter="") 
 
+FileModEpochYear = datetime.datetime(2020, 12, 31)
+UnixFileModEpochYear = time.mktime(FileModEpochYear.timetuple())
+print "UnixFileModEpochYear",UnixFileModEpochYear
+
+def unixtimestamp_to_dt(uts) :
+    dt =datetime.datetime.fromtimestamp(uts)
+    print dt.strftime('%Y-%m-%d %H:%M:%S')
+    return dt    
 # A simple function acting as a Subscription listener
+
+csv_file = "ls.csv"
+
 def on_item_update(item_update):
 
+    
     #print item_update
     item_name = item_update["name"]
     item_value = item_update["values"]["Value"] 
     print "name", item_name, PUI_NAMES[item_name]
-
+    csv_txt = item_name+","+'"'+PUI_NAMES[item_name]+'"'+","+item_value+","
     if item_update["name"] == "USLAB000040" :
        # Beta Angle
        betaAngleValue = float(item_update["values"]["Value"].encode('ascii', 'ignore'))
        
     if item_name in specialPUIs:
-       print "  ",eval(item_name)[int(item_value.encode('ascii', 'ignore'))]
+       vtxt = eval(item_name)[int(item_value.encode('ascii', 'ignore'))]
+       print "  ",vtxt
+       csv_txt = csv_txt + '"'+vtxt+'"' + ","
+    else :
+       csv_txt = csv_txt + "," 
        
     print "  values:",TS_to_GMT(item_update["values"]["TimeStamp"])
+    tsu = item_update["values"]["TimeStamp"]
+    ts_str = tsu.encode('ascii', 'ignore')
+    #print ts_str
+    ts = float( ts_str )  
+    HoursFromJan1AsEpoch = ts 
+    SecondsFromJan1AsEpoch = HoursFromJan1AsEpoch * 60 * 60
+    ResultingEpoch =  UnixFileModEpochYear + SecondsFromJan1AsEpoch
+    
+    print "Timestamp date:",
+    dt =unixtimestamp_to_dt(ResultingEpoch)
+    csv_txt = dt.strftime('%Y-%m-%d %H:%M:%S') +","+ csv_txt + "\n" 
+
+    if item_name in Qvals :
+       if gotAllLVLH(item_name,item_value) :
+          setRPY()
+          print "Yaw,Pitch,Roll:",yaw,pitch,roll
+          
+    
+    with open(csv_file, "a") as myfile:
+              myfile.write(csv_txt)
+              
     print "  Value", item_value
+    if item_update["name"] == "TIME_000001" :
+       # note time value is number of milliseconds SINCE Jan 1
+       print "TIME:",
+       dtv = unixtimestamp_to_dt( float( item_value)/1000 + UnixFileModEpochYear )
+       
 
 
     

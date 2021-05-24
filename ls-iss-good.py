@@ -541,7 +541,7 @@ def unixtimestamp_to_dt(uts) :
     return dt    
 # A simple function acting as a Subscription listener
 
-csv_file = "ls-soyuz.csv"
+csv_file = "ls-crew1-splash.csv"
 
 def on_item_update(item_update):
 
