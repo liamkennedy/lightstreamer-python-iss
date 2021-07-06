@@ -527,7 +527,7 @@ subscription = Subscription(
 #PRT_POWER = "P6000004","P6000005","P6000008"
 subscription = Subscription(
     mode="MERGE",
-    items=["USLAB000086","USLAB000081","USLAB000012","USLAB000016","S0000003","S0000004","S0000008","S0000009","P6000004","P6000005","P6000008","S4000001","S4000002","S4000007"],
+    items=["USLAB000086","USLAB000081","USLAB000012","USLAB000016","S0000003","S0000004","S0000008","S0000009","P6000004","P6000005","P6000008","S4000001","S4000002","S4000007","P6000001","P6000002","P6000007"],
     fields=["Value","TimeStamp"],
     adapter="") 
 
@@ -541,7 +541,9 @@ def unixtimestamp_to_dt(uts) :
     return dt    
 # A simple function acting as a Subscription listener
 
-csv_file = "ls-crew1-splash.csv"
+csv_file = "ls-panels.csv"
+SCRIPTPATH = os.path.dirname(os.path.realpath(__file__)) # allows running from boot
+csv_file = os.path.join(SCRIPTPATH,csv_file)
 
 def on_item_update(item_update):
 
@@ -633,8 +635,15 @@ subscription.addlistener(on_item_update)
 #substatus_key = lightstreamer_client.subscribe(subStatus)
 sub_key = lightstreamer_client.subscribe(subscription)
 
+cntlp = 0
+while True:
+    time.sleep(1)
+    cntlp+=1
+    print(cntlp)
 
-wait_for_input()
+#wait_for_input()
+# basically this stuff won't get called.  
+# but then running this long-term the code cannot unsubscribe or disconnect anyway
 
 # Unsubscribing from Lightstreamer by using the subscription key
 lightstreamer_client.unsubscribe(sub_key)
