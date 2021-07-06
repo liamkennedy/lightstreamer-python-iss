@@ -637,7 +637,7 @@ sub_key = lightstreamer_client.subscribe(subscription)
 
 cntlp = 0
 while True:
-    time.sleep(1)
+    time.sleep(30)
     cntlp+=1
     print(cntlp)
 
