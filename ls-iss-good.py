@@ -571,6 +571,7 @@ def on_item_update(item_update):
     ts = float( ts_str )  
     HoursFromJan1AsEpoch = ts 
     SecondsFromJan1AsEpoch = HoursFromJan1AsEpoch * 60 * 60
+    SecondsFromJan1AsEpoch = SecondsFromJan1AsEpoch - 60*60 # correct by one hour (Not sure why I needed to do this)
     ResultingEpoch =  UnixFileModEpochYear + SecondsFromJan1AsEpoch
     
     print "Timestamp date:",

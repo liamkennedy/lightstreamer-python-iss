@@ -608,6 +608,8 @@ def unixtimestamp_to_dt(uts) :
 # A simple function acting as a Subscription listener
 
 csv_file = "ls-ypr.csv"
+SCRIPTPATH = os.path.dirname(os.path.realpath(__file__)) # allows running from boot
+csv_file = os.path.join(SCRIPTPATH,csv_file)
 
 def on_item_update(item_update):
 
@@ -628,6 +630,7 @@ def on_item_update(item_update):
           ts = float( ts_str )  
           HoursFromJan1AsEpoch = ts 
           SecondsFromJan1AsEpoch = HoursFromJan1AsEpoch * 60 * 60
+          SecondsFromJan1AsEpoch = SecondsFromJan1AsEpoch - 60*60 # correct by one hour (Not sure why I needed to do this)
           ResultingEpoch =  UnixFileModEpochYear + SecondsFromJan1AsEpoch
           dt =unixtimestamp_to_dt(ResultingEpoch)
           csv_txt = dt.strftime('%Y-%m-%d %H:%M:%S') +","+ str(yaw) +"," + str(pitch) +"," + str(roll) + "\n"
@@ -682,7 +685,15 @@ subscription.addlistener(on_item_update)
 sub_key = lightstreamer_client.subscribe(subscription)
 
 
-wait_for_input()
+cntlp = 0
+while True:
+    time.sleep(30)
+    cntlp+=1
+    print(cntlp)
+
+#wait_for_input()
+# basically this stuff won't get called.  
+# but then running this long-term the code cannot unsubscribe or disconnect anyway
 
 # Unsubscribing from Lightstreamer by using the subscription key
 lightstreamer_client.unsubscribe(sub_key)
